@@ -233,3 +233,127 @@ and change this value in the rentals array
 rentalPrice();
 console.log(rentals);
 
+/* function to compute the rental price */
+function rentalPriceDecreasing(){
+	var time;
+	var distance;
+	var rentalPrice;
+	for(var i = 0; i<rentals.length;i++)
+	{
+		var daysDiff = getDays(rentals[i].pickupDate,rentals[i].returnDate);	
+
+		for(var j = 0; j<cars.length;j++)
+		{			
+			if (rentals[i].carId==cars[j].id)
+			{						
+				time = daysDiff * cars[i].pricePerDay;
+				distance = cars[i].pricePerKm * rentals[i].distance;
+				if(daysDiff>10)
+				{
+					rentalPrice = time*0.5 + distance;
+					rentals[i].price=rentalPrice;
+				}
+				else if(daysDiff>4)
+				{
+					rentalPrice = time*0.7 + distance;
+					rentals[i].price=rentalPrice;
+				}
+				else if(daysDiff>1)
+				{
+					rentalPrice = time*0.9 + distance;
+					rentals[i].price=rentalPrice;
+				}
+				else
+				{
+					rentalPrice = time + distance;
+					rentals[i].price=rentalPrice;
+				}
+			}
+		}
+	}	
+}
+/* 
+we call the function that compute the rental price 
+and change this value in the rentals array
+*/
+rentalPriceDecreasing();
+console.log(rentals);
+
+/*
+Function to compute the comissions
+the amount that belongs to the insurance, to the assistance and to drivy
+*/
+function commission()
+{
+	var commission;
+	var daysDiff;
+	var ins_com;
+	var asist_com;
+	var drv_com;
+	
+	for (var i = 0; i<rentals.length;i++)
+	{
+		commission = rentals[i].price*0.3;
+		daysDiff = getDays(rentals[i].pickupDate,rentals[i].returnDate);
+
+		// insurance part
+		ins_com = commission/2;
+		rentals[i].commission.insurance = ins_com;
+
+		// road assistance part
+		rentals[i].commission.assistance = ins_assist;
+		
+		// drivy part
+		drv_com = commission - ins_com - ins_assist;
+		rentals[i].commission.drivy = drv_com;
+	}	
+}
+commission();
+console.log(rentals);
+
+function deductible()
+{
+	for (var i = 0; i<rentals.length;i++)
+	{
+		daysDiff = getDays(rentals[i].pickupDate,rentals[i].returnDate);
+		if(rentals[i].options.deductibleReduction == true)
+		{
+			rentals[i].price= rentals[i].price + daysDiff*4;
+		}
+	}
+}
+deductible();
+console.log(rentals);
+
+function payTheActors()
+{
+	for (var i = 0; i<actors.length;i++)
+	{
+		for(var j=0; j<rentals.length;j++)
+		{
+			if(actors[i].rentalId == rentals[j].id)
+			{
+				// driver debit
+				actors[i].payment[0].amount = rentals[j].price;
+				// owner credit
+				actors[i].payment[1].amount = rentals[j].price * 0.7;
+				// insurance credit
+				actors[i].payment[2].amount = rentals[j].commission.insurance;
+				// assistance credit
+				actors[i].payment[3].amount = rentals[j].commission.assistance;
+				// credit drivy
+				daysDiff = getDays(rentals[j].pickupDate,rentals[j].returnDate);
+				deductibleRed = daysDiff*4;
+				actors[i].payment[4].amount = rentals[j].commission.drivy + deductibleRed;
+			}
+		}
+	}
+}
+payTheActors();
+console.log(actors);
+
+
+console.log(cars);
+console.log(rentals);
+console.log(actors);
+console.log(rentalModifications);
